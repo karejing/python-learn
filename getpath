@@ -1,0 +1,85 @@
+import os
+import shutil
+import datetime
+
+'''
+作用：将目录备份到其他路径。
+实际效果：
+假设给定目录"/media/data/programmer/project/python" ，
+备份路径"/home/diegoyun/backup/“ ，
+则会将python目录备份到备份路径下，形如：
+/home/diegoyun/backup/yyyymmddHHMMSS/python/xxx/yyy/zzz ..
+
+用法:更改这两个参数.
+backdir:备份目的地.
+copydirs:想要备份的文件夹.
+'''
+
+
+def mainLogic():
+    #add dirs you want to copy
+    backdir="d:\\test"
+    print(backdir)
+
+    copydirs=[]
+    copydirs.append("d:\\temp");
+    #copydirs.append("d:\\test");
+    
+    
+
+    print("Copying files  ===================")
+    start=datetime.datetime.now()
+
+    #gen a data folder for backup
+    backdir=os.path.join(backdir,start.strftime("%Y-%m-%d"))
+    #print("backdir is:"+backdir)
+
+    
+    kc=0
+    for d in copydirs:
+        kc=kc+copyFiles(d,backdir)
+
+    end=datetime.datetime.now()
+    print("Finished! ===================")
+    print("Total files : " + str(kc) )
+    print("Elapsed time : " + str((end-start).seconds)+" seconds")
+
+def copyFiles(copydir,backdir):
+    prefix=getPathPrefix(copydir)
+    #print("prefix is:"+prefix )   
+
+    i=0
+    for dirpath,dirnames,filenames in os.walk(copydir):
+        for name in filenames:
+            oldpath=os.path.join(dirpath,name)
+            newpath=omitPrefix(dirpath,prefix)
+            print("backdir is:"+backdir )           
+            newpath=os.path.join(backdir,newpath)
+            print("newpath is:"+newpath)
+
+            if os.path.exists(newpath)!=True:
+                os.makedirs(newpath)  
+            newpath=os.path.join(newpath,name)
+            print("From:"+oldpath+" to:"+newpath)
+            shutil.copyfile(oldpath,newpath)
+            i=i+1
+    return i    
+
+def getPathPrefix(fullpath):
+    #Giving /media/data/programmer/project/ , get the prefix
+    #/media/data/programmer/
+    l=fullpath.split(os.path.sep)
+    #print(str(l[-1]=="")    
+    if l[-1]=="":
+        tmp=l[-2]
+    else:
+        tmp=l[-1]
+    return fullpath[0:len(fullpath)-len(tmp)-1]
+
+def omitPrefix(fullpath,prefix):
+    #Giving /media/data/programmer/project/python/tutotial/file/test.py ,
+    #and prefix is Giving /media/data/programmer/project/,
+    #return path as python/tutotial/file/test.py
+    return fullpath[len(prefix)+1:]
+
+mainLogic()
